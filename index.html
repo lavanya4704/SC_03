@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Knowledge Quiz</title>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --accent-color: #4fc3f7;
+            --correct-color: #4caf50;
+            --wrong-color: #f44336;
+            --text-color: #333;
+            --light-bg: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--light-bg);
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .quiz-container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: var(--secondary-color);
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        
+        .question {
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .question.correct {
+            border-left: 5px solid var(--correct-color);
+        }
+        
+        .question.incorrect {
+            border-left: 5px solid var(--wrong-color);
+        }
+        
+        .question-text {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+        }
+        
+        .options {
+            margin-left: 10px;
+        }
+        
+        .option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            position: relative;
+        }
+        
+        .option:hover {
+            background-color: rgba(74, 111, 165, 0.1);
+        }
+        
+        .option input {
+            margin-right: 12px;
+            cursor: pointer;
+        }
+        
+        .option.correct-answer {
+            background-color: rgba(76, 175, 80, 0.2);
+            border: 1px solid var(--correct-color);
+        }
+        
+        .option.user-correct {
+            background-color: rgba(76, 175, 80, 0.3);
+        }
+        
+        .option.user-incorrect {
+            background-color: rgba(244, 67, 54, 0.2);
+            text-decoration: line-through;
+        }
+        
+        .option-marker {
+            position: absolute;
+            right: 15px;
+            font-weight: bold;
+        }
+        
+        .correct-marker {
+            color: var(--correct-color);
+        }
+        
+        .incorrect-marker {
+            color: var(--wrong-color);
+        }
+        
+        .text-answer {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        
+        .text-answer.correct {
+            border-color: var(--correct-color);
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+        
+        .text-answer.incorrect {
+            border-color: var(--wrong-color);
+            background-color: rgba(244, 67, 54, 0.1);
+        }
+        
+        button {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            margin-top: 30px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        
+        button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .score-container {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            font-size: 22px;
+            font-weight: 600;
+            display: none;
+            background-color: rgba(74, 111, 165, 0.1);
+        }
+        
+        .progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: var(--primary-color);
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+        
+        .feedback {
+            margin-top: 10px;
+            font-size: 14px;
+            display: none;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .correct {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: var(--correct-color);
+        }
+        
+        .incorrect {
+            background-color: rgba(244, 67, 54, 0.1);
+            color: var(--wrong-color);
+        }
+        
+        .timer {
+            text-align: right;
+            font-size: 16px;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+        }
+        
+        .difficulty {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .easy {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: var(--correct-color);
+        }
+        
+        .medium {
+            background-color: rgba(255, 193, 7, 0.2);
+            color: #ffa000;
+        }
+        
+        .hard {
+            background-color: rgba(244, 67, 54, 0.2);
+            color: var(--wrong-color);
+        }
+        
+        @media (max-width: 600px) {
+            .quiz-container {
+                padding: 15px;
+            }
+            
+            .question {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1>Advanced Knowledge Quiz</h1>
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
+        <div class="timer" id="timer">Time: 05:00</div>
+        
+        <form id="quizForm">
+            <div class="question" id="question1">
+                <div class="question-text">
+                    1. Which algorithm provides the most efficient average-case time complexity for sorting arbitrary data?
+                    <span class="difficulty medium">Medium</span>
+                </div>
+                <div class="options">
+                    <label class="option" id="option1-1">
+                        <input type="radio" name="q1" value="Bubble Sort"> Bubble Sort
+                    </label>
+                    <label class="option" id="option1-2">
+                        <input type="radio" name="q1" value="Quick Sort"> Quick Sort
+                    </label>
+                    <label class="option" id="option1-3">
+                        <input type="radio" name="q1" value="Insertion Sort"> Insertion Sort
+                    </label>
+                    <label class="option" id="option1-4">
+                        <input type="radio" name="q1" value="Selection Sort"> Selection Sort
+                    </label>
+                </div>
+                <div class="feedback" id="feedback1"></div>
+            </div>
+            
+            <div class="question" id="question2">
+                <div class="question-text">
+                    2. In object-oriented programming, what principle is demonstrated when a subclass modifies or extends the behavior of its superclass?
+                    <span class="difficulty easy">Easy</span>
+                </div>
+                <div class="options">
+                    <label class="option" id="option2-1">
+                        <input type="radio" name="q2" value="Encapsulation"> Encapsulation
+                    </label>
+                    <label class="option" id="option2-2">
+                        <input type="radio" name="q2" value="Polymorphism"> Polymorphism
+                    </label>
+                    <label class="option" id="option2-3">
+                        <input type="radio" name="q2" value="Inheritance"> Inheritance
+                    </label>
+                    <label class="option" id="option2-4">
+                        <input type="radio" name="q2" value="Abstraction"> Abstraction
+                    </label>
+                </div>
+                <div class="feedback" id="feedback2"></div>
+            </div>
+            
+            <div class="question" id="question3">
+                <div class="question-text">
+                    3. What does the CAP theorem state about distributed systems?
+                    <span class="difficulty hard">Hard</span>
+                </div>
+                <div class="options">
+                    <label class="option" id="option3-1">
+                        <input type="radio" name="q3" value="option1"> They can simultaneously guarantee Consistency, Availability, and Partition tolerance
+                    </label>
+                    <label class="option" id="option3-2">
+                        <input type="radio" name="q3" value="option2"> They can only guarantee two out of Consistency, Availability, and Partition tolerance at any time
+                    </label>
+                    <label class="option" id="option3-3">
+                        <input type="radio" name="q3" value="option3"> They must prioritize Partition tolerance over Consistency and Availability
+                    </label>
+                    <label class="option" id="option3-4">
+                        <input type="radio" name="q3" value="option4"> They can achieve all three properties through eventual consistency
+                    </label>
+                </div>
+                <div class="feedback" id="feedback3"></div>
+            </div>
+            
+            <div class="question" id="question4">
+                <div class="question-text">
+                    4. In machine learning, what is the purpose of a validation set?
+                </div>
+                <div class="options">
+                    <label class="option" id="option4-1">
+                        <input type="radio" name="q4" value="option1"> To train the final model
+                    </label>
+                    <label class="option" id="option4-2">
+                        <input type="radio" name="q4" value="option2"> To test the model's performance on unseen data
+                    </label>
+                    <label class="option" id="option4-3">
+                        <input type="radio" name="q4" value="option3"> To tune hyperparameters and prevent overfitting
+                    </label>
+                    <label class="option" id="option4-4">
+                        <input type="radio" name="q4" value="option4"> To preprocess the input data
+                    </label>
+                </div>
+                <div class="feedback" id="feedback4"></div>
+            </div>
+            
+            <div class="question" id="question5">
+                <div class="question-text">
+                    5. Explain the difference between symmetric and asymmetric encryption in one sentence:
+                </div>
+                <input type="text" name="q5" id="textAnswer" class="text-answer" placeholder="Your answer...">
+                <div class="feedback" id="feedback5"></div>
+            </div>
+            
+            <button type="button" id="submitBtn">Submit Quiz</button>
+        </form>
+        
+        <div class="score-container" id="scoreDisplay"></div>
+    </div>
+
+    <script>
+        // Quiz answers and explanations
+        const quizData = {
+            q1: {
+                correctAnswer: "Quick Sort",
+                correctOption: "option1-2",
+                explanation: "Quick Sort has an average-case time complexity of O(n log n), which is the most efficient for sorting arbitrary data. While other algorithms like Merge Sort also have this complexity, Quick Sort is often faster in practice due to better cache performance."
+            },
+            q2: {
+                correctAnswer: "Polymorphism",
+                correctOption: "option2-2",
+                explanation: "Polymorphism allows a subclass to modify or extend the behavior of its superclass through method overriding. This is a fundamental principle of object-oriented programming that enables runtime method binding."
+            },
+            q3: {
+                correctAnswer: "option2",
+                correctOption: "option3-2",
+                explanation: "The CAP theorem states that in any distributed system, you can only guarantee two out of three properties: Consistency (all nodes see the same data), Availability (every request receives a response), and Partition tolerance (the system continues operating despite network partitions)."
+            },
+            q4: {
+                correctAnswer: "option3",
+                correctOption: "option4-3",
+                explanation: "The validation set is used to tune hyperparameters and evaluate the model during training to prevent overfitting. The test set is reserved for final evaluation, while the training set is used to actually train the model."
+            },
+            q5: {
+                correctAnswer: "symmetric uses one key for both encryption and decryption while asymmetric uses a public key for encryption and private key for decryption",
+                explanation: "Symmetric encryption is faster but requires secure key exchange, while asymmetric encryption solves the key distribution problem but is computationally more expensive. Most systems use a combination of both."
+            }
+        };
+
+        // Timer functionality
+        let timeLeft = 300; // 5 minutes in seconds
+        const timerElement = document.getElementById('timer');
+        const timerInterval = setInterval(updateTimer, 1000);
+
+        function updateTimer() {
+            timeLeft--;
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerElement.textContent = `Time: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                submitQuiz();
+                alert("Time's up! Your quiz has been submitted automatically.");
+            }
+        }
+
+        // Progress bar
+        function updateProgressBar() {
+            const form = document.getElementById('quizForm');
+            const totalQuestions = Object.keys(quizData).length;
+            let answered = 0;
+            
+            for (let i = 1; i <= totalQuestions; i++) {
+                const questionName = `q${i}`;
+                if (form.elements[questionName]) {
+                    if (form.elements[questionName].type === 'radio') {
+                        if ([...form.elements[questionName]].some(radio => radio.checked)) {
+                            answered++;
+                        }
+                    } else if (form.elements[questionName].type === 'text') {
+                        if (form.elements[questionName].value.trim() !== '') {
+                            answered++;
+                        }
+                    }
+                }
+            }
+            
+            const progress = (answered / totalQuestions) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+        }
+
+        // Add event listeners to update progress bar
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', updateProgressBar);
+        });
+        
+        document.querySelectorAll('input[type="text"]').forEach(textInput => {
+            textInput.addEventListener('input', updateProgressBar);
+        });
+
+        // Submit quiz function
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            let score = 0;
+            const form = document.getElementById('quizForm');
+            const userAnswers = new FormData(form);
+            
+            // Check each answer
+            for (const [question, userAnswer] of userAnswers.entries()) {
+                const questionElement = document.getElementById(`question${question.slice(1)}`);
+                const feedbackElement = document.getElementById(`feedback${question.slice(1)}`);
+                
+                if (quizData[question]) {
+                    const correctAnswer = quizData[question].correctAnswer;
+                    let isCorrect = false;
+                    
+                    // For text answers, do a fuzzy match
+                    if (question === 'q5') {
+                        const userText = userAnswer.toLowerCase();
+                        const correctText = correctAnswer.toLowerCase();
+                        isCorrect = userText.includes('symmetric') && 
+                                    userText.includes('asymmetric') && 
+                                    (userText.includes('one key') || userText.includes('single key')) && 
+                                    (userText.includes('public') && userText.includes('private'));
+                        
+                        const textAnswerElement = document.getElementById('textAnswer');
+                        if (isCorrect) {
+                            textAnswerElement.classList.add('correct');
+                            textAnswerElement.classList.remove('incorrect');
+                        } else {
+                            textAnswerElement.classList.add('incorrect');
+                            textAnswerElement.classList.remove('correct');
+                        }
+                    } else {
+                        isCorrect = userAnswer === correctAnswer;
+                        
+                        // Mark all options for this question
+                        const options = document.querySelectorAll(`#question${question.slice(1)} .option`);
+                        options.forEach(option => {
+                            option.classList.remove('correct-answer', 'user-correct', 'user-incorrect');
+                            
+                            // Mark correct answer
+                            if (option.id === quizData[question].correctOption) {
+                                option.classList.add('correct-answer');
+                                const marker = document.createElement('span');
+                                marker.className = 'option-marker correct-marker';
+                                marker.textContent = '✓ Correct Answer';
+                                option.appendChild(marker);
+                            }
+                            
+                            // Mark user's answer if it was a radio selection
+                            const input = option.querySelector('input');
+                            if (input && input.checked) {
+                                if (input.value === correctAnswer) {
+                                    option.classList.add('user-correct');
+                                } else {
+                                    option.classList.add('user-incorrect');
+                                    const marker = document.createElement('span');
+                                    marker.className = 'option-marker incorrect-marker';
+                                    marker.textContent = '✗ Your Answer';
+                                    option.appendChild(marker);
+                                }
+                            }
+                        });
+                    }
+                    
+                    if (isCorrect) {
+                        score++;
+                        questionElement.classList.add('correct');
+                        questionElement.classList.remove('incorrect');
+                        feedbackElement.textContent = `✓ Correct! ${quizData[question].explanation}`;
+                        feedbackElement.className = "feedback correct";
+                    } else {
+                        questionElement.classList.add('incorrect');
+                        questionElement.classList.remove('correct');
+                        feedbackElement.textContent = `✗ Incorrect. The correct answer is: ${correctAnswer}. ${quizData[question].explanation}`;
+                        feedbackElement.className = "feedback incorrect";
+                    }
+                    
+                    feedbackElement.style.display = 'block';
+                }
+            }
+            
+            // Calculate percentage
+            const percentage = Math.round((score / Object.keys(quizData).length) * 100);
+            let message;
+            
+            if (percentage >= 80) {
+                message = `Excellent! You scored ${score}/${Object.keys(quizData).length} (${percentage}%) - Advanced knowledge!`;
+            } else if (percentage >= 60) {
+                message = `Good job! You scored ${score}/${Object.keys(quizData).length} (${percentage}%) - Solid understanding.`;
+            } else if (percentage >= 40) {
+                message = `You scored ${score}/${Object.keys(quizData).length} (${percentage}%) - Keep learning!`;
+            } else {
+                message = `You scored ${score}/${Object.keys(quizData).length} (${percentage}%) - Review the concepts and try again.`;
+            }
+            
+            document.getElementById('scoreDisplay').textContent = message;
+            document.getElementById('scoreDisplay').style.display = 'block';
+            document.getElementById('submitBtn').disabled = true;
+            
+            // Scroll to results
+            document.getElementById('scoreDisplay').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Initialize progress bar
+        updateProgressBar();
+        
+        // Add submit button event listener
+        document.getElementById('submitBtn').addEventListener('click', submitQuiz);
+    </script>
+</body>
+</html>
